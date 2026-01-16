@@ -5,7 +5,7 @@ import * as THREE from 'three'
 export function Movement() {
   const { camera, gl, scene } = useThree()
   
-  const moveSpeed = 5
+  const moveSpeed = 3
   const lookSpeed = 0.002
   const gravity = -9.8
   const jumpForce = 5
@@ -60,7 +60,7 @@ export function Movement() {
     }
   }, [camera, gl])
   
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     // Prevents fall when alt+tab
     delta = Math.min(delta, 0.1)
     
@@ -106,10 +106,24 @@ export function Movement() {
     raycaster.current.far = playerHeight + 0.1
     const intersects = raycaster.current.intersectObjects(scene.children, true)
     
-    if (intersects.length > 0) {
-      const distanceToGround = intersects[0].distance
+    const groundIntersects = intersects.filter(intersect => {
+      let obj = intersect.object
+      while (obj) {
+        if (obj.userData.hasCollision === false) {
+          return false
+        }
+        if (obj.userData.hasCollision === true) {
+          return true
+        }
+        obj = obj.parent as THREE.Object3D
+      }
+      return true 
+    })
+    
+    if (groundIntersects.length > 0) {
+      const distanceToGround = groundIntersects[0].distance
       if (distanceToGround < playerHeight) {
-        camera.position.y = intersects[0].point.y + playerHeight
+        camera.position.y = groundIntersects[0].point.y + playerHeight
         verticalVelocity.current = 0
         isOnGround.current = true
       } else {
@@ -123,7 +137,23 @@ export function Movement() {
     raycaster.current.set(camera.position, new THREE.Vector3(0, 1, 0))
     raycaster.current.far = 0.2
     const ceilingIntersects = raycaster.current.intersectObjects(scene.children, true)
-    if (ceilingIntersects.length > 0 && verticalVelocity.current > 0) {
+    
+    // Check for collisions 
+    const validCeilingIntersects = ceilingIntersects.filter(intersect => {
+      let obj = intersect.object
+      while (obj) {
+        if (obj.userData.hasCollision === false) {
+          return false
+        }
+        if (obj.userData.hasCollision === true) {
+          return true
+        }
+        obj = obj.parent as THREE.Object3D
+      }
+      return true
+    })
+    
+    if (validCeilingIntersects.length > 0 && verticalVelocity.current > 0) {
       verticalVelocity.current = 0
     }
   })
@@ -141,8 +171,18 @@ export function Movement() {
       raycaster.current.set(position, dir)
       raycaster.current.far = playerRadius
       const intersects = raycaster.current.intersectObjects(scene.children, true)
-      if (intersects.length > 0) {
-        return true
+      
+      for (const intersect of intersects) {
+        let obj = intersect.object
+        while (obj) {
+          if (obj.userData.hasCollision === true) {
+            return true
+          }
+          if (obj.userData.hasCollision === false) {
+            break 
+          }
+          obj = obj.parent as THREE.Object3D
+        }
       }
     }
     return false
