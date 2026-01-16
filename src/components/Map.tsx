@@ -46,17 +46,40 @@ export function Map() {
   const renderInstancesAtMarkers = (
     model: THREE.Group,
     markers: MarkerData[],
-    keyPrefix: string
+    keyPrefix: string,
+    options?: {
+      randomRotation?: boolean
+      heightVariation?: boolean
+    }
   ) => {
     return markers.map((marker, index) => {
       const modelClone = model.clone()
+      
+      // Apply rotation randomness
+      const rotation = options?.randomRotation
+        ? new THREE.Euler(
+            marker.rotation.x,
+            Math.random() * Math.PI * 2,
+            marker.rotation.z
+          )
+        : marker.rotation
+      
+      // Apply height randomness
+      const scale = options?.heightVariation
+        ? new THREE.Vector3(
+            marker.scale.x,
+            marker.scale.y * (0.9 + Math.random() * 0.2),
+            marker.scale.z
+          )
+        : marker.scale
+      
       return (
         <primitive
           key={`${keyPrefix}-${index}`}
           object={modelClone}
           position={marker.position}
-          rotation={marker.rotation}
-          scale={marker.scale}
+          rotation={rotation}
+          scale={scale}
           userData={{ hasCollision: true }}
         />
       )
@@ -73,7 +96,10 @@ export function Map() {
       <primitive object={palletTown.scene} />
       
       {/* Place all objects at their markers */}
-      {renderInstancesAtMarkers(tree.scene, treeMarkers, 'tree')}
+      {renderInstancesAtMarkers(tree.scene, treeMarkers, 'tree', { 
+        randomRotation: true, 
+        heightVariation: true 
+      })}
       {/* {renderInstancesAtMarkers(flowerPatch.scene, flowerMarkers, 'flowerPatch')} */}
     </>
   )
