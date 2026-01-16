@@ -2,17 +2,24 @@ import { useGLTF } from '@react-three/drei'
 import { useMemo } from 'react'
 import * as THREE from 'three'
 
+type MarkerData = {
+  position: THREE.Vector3
+  rotation: THREE.Euler
+  scale: THREE.Vector3
+}
+
 export function Map() {
   // Load models
   const palletTown = useGLTF('/models/palletTown.glb')
   const tree = useGLTF('/models/tree.glb')
+  // const flowerPatch = useGLTF('/models/flowerPatch.glb')
   
-  // Assign trees to markers
-  const treeInstances = useMemo(() => {
-    const markers: Array<{ position: THREE.Vector3; rotation: THREE.Euler; scale: THREE.Vector3 }> = []
+  // Reusable method to locate markers
+  const getMarkersFromScene = (scene: THREE.Group, markerName: string): MarkerData[] => {
+    const markers: MarkerData[] = []
     
-    palletTown.scene.traverse((child) => {
-      if (child.name.toLowerCase().includes('treemarker')) {
+    scene.traverse((child) => {
+      if (child.name.toLowerCase().includes(markerName.toLowerCase())) {
         // Get position, rotation, scale
         const worldPosition = new THREE.Vector3()
         const worldRotation = new THREE.Euler()
@@ -33,27 +40,41 @@ export function Map() {
     })
     
     return markers
-  }, [palletTown.scene])
+  }
+  
+  // Reusable method to render objects at marker positions
+  const renderInstancesAtMarkers = (
+    model: THREE.Group,
+    markers: MarkerData[],
+    keyPrefix: string
+  ) => {
+    return markers.map((marker, index) => {
+      const modelClone = model.clone()
+      return (
+        <primitive
+          key={`${keyPrefix}-${index}`}
+          object={modelClone}
+          position={marker.position}
+          rotation={marker.rotation}
+          scale={marker.scale}
+          userData={{ hasCollision: true }}
+        />
+      )
+    })
+  }
+  
+  // Get marker positions
+  const treeMarkers = useMemo(() => getMarkersFromScene(palletTown.scene, 'TREEMARKER'), [palletTown.scene])
+  // const flowerMarkers = useMemo(() => getMarkersFromScene(palletTown.scene, 'FLOWERPATCHMARKER'), [palletTown.scene])
   
   return (
     <>
       {/* Place city model */}
       <primitive object={palletTown.scene} />
       
-      {treeInstances.map((marker, index) => {
-        const treeClone = tree.scene.clone()
-        return (
-          <primitive
-          // Place the trees 
-            key={`tree-${index}`}
-            object={treeClone}
-            position={marker.position}
-            rotation={marker.rotation}
-            scale={marker.scale}
-            userData={{ hasCollision: true }}
-          />
-        )
-      })}
+      {/* Place all objects at their markers */}
+      {renderInstancesAtMarkers(tree.scene, treeMarkers, 'tree')}
+      {/* {renderInstancesAtMarkers(flowerPatch.scene, flowerMarkers, 'flowerPatch')} */}
     </>
   )
 }
