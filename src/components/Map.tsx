@@ -14,6 +14,7 @@ export function Map() {
   const tree = useGLTF("/models/tree.glb");
   const flowerPatch = useGLTF("/models/flowerPatch.glb");
   const fence = useGLTF("/models/fence.glb");
+  const sign = useGLTF("/models/sign.glb");
 
   // Reusable method to locate markers
   const getMarkersFromScene = (
@@ -104,6 +105,10 @@ export function Map() {
     () => getMarkersFromScene(palletTown.scene, "FENCEMARKER"),
     [palletTown.scene],
   );
+  const signMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "SIGNMARKER"),
+    [palletTown.scene],
+  );
 
   return (
     <>
@@ -122,6 +127,7 @@ export function Map() {
         { randomRotation: true, heightVariation: true, noCollision: true },
       )}
       {renderInstancesAtMarkers(fence.scene, fenceMarkers, "fence")}
+      {renderInstancesAtMarkers(sign.scene, signMarkers, "sign")}
     </>
   );
 }
