@@ -102,12 +102,21 @@ export function Map() {
 
   return (
     <>
-      {/* Place city model */}
-      <primitive object={palletTown.scene} />
+      {/* Place city model & borders*/}
+      <primitive object={palletTown.scene} userData={{ hasCollision: true }} />
 
       {/* Place all objects at their markers */}
-      {renderInstancesAtMarkers(tree.scene, treeMarkers, "tree", { randomRotation: true, heightVariation: true, noCollision: false })}
-      {renderInstancesAtMarkers(flowerPatch.scene, flowerMarkers, "flowerPatch", { randomRotation: true, heightVariation: true, noCollision: true })}
+      {renderInstancesAtMarkers(tree.scene, treeMarkers, "tree", {
+        randomRotation: true,
+        heightVariation: true,
+        noCollision: false,
+      })}
+      {renderInstancesAtMarkers(
+        flowerPatch.scene,
+        flowerMarkers,
+        "flowerPatch",
+        { randomRotation: true, heightVariation: true, noCollision: true },
+      )}
     </>
   );
 }
