@@ -53,6 +53,7 @@ export function Map() {
     options?: {
       randomRotation?: boolean;
       heightVariation?: boolean;
+      noCollision?: boolean;
     },
   ) => {
     return markers.map((marker, index) => {
@@ -83,7 +84,7 @@ export function Map() {
           position={marker.position}
           rotation={rotation}
           scale={scale}
-          userData={{ hasCollision: true }}
+          userData={{ hasCollision: !options?.noCollision }}
         />
       );
     });
@@ -105,8 +106,8 @@ export function Map() {
       <primitive object={palletTown.scene} />
 
       {/* Place all objects at their markers */}
-      {renderInstancesAtMarkers(tree.scene, treeMarkers, "tree",{ randomRotation: true, heightVariation: true,})}
-      {renderInstancesAtMarkers(flowerPatch.scene, flowerMarkers, "flowerPatch",{ randomRotation: true, heightVariation: true,})}
+      {renderInstancesAtMarkers(tree.scene, treeMarkers, "tree", { randomRotation: true, heightVariation: true, noCollision: false })}
+      {renderInstancesAtMarkers(flowerPatch.scene, flowerMarkers, "flowerPatch", { randomRotation: true, heightVariation: true, noCollision: true })}
     </>
   );
 }
