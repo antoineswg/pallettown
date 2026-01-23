@@ -16,6 +16,9 @@ export function Map() {
   const fence = useGLTF("/models/fence.glb");
   const sign = useGLTF("/models/sign.glb");
   const signPost = useGLTF("/models/signPost.glb");
+  const lab = useGLTF("/models/lab.glb");
+  const house = useGLTF("/models/house.glb");
+  const letterbox = useGLTF("/models/letterbox.glb");
 
   // Reusable method to locate markers
   const getMarkersFromScene = (
@@ -114,6 +117,18 @@ export function Map() {
     () => getMarkersFromScene(palletTown.scene, "SIGNPOSTMARKER"),
     [palletTown.scene],
   );
+  const labMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "LABMARKER"),
+    [palletTown.scene],
+  );
+  const houseMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "HOUSEMARKER"),
+    [palletTown.scene],
+  );
+  const letterboxMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "LETTERBOXMARKER"),
+    [palletTown.scene],
+  );
 
   return (
     <>
@@ -134,6 +149,9 @@ export function Map() {
       {renderInstancesAtMarkers(fence.scene, fenceMarkers, "fence")}
       {renderInstancesAtMarkers(sign.scene, signMarkers, "sign")}
       {renderInstancesAtMarkers(signPost.scene, signPostMarkers, "signPost")}
+      {renderInstancesAtMarkers(lab.scene, labMarkers, "lab")}
+      {renderInstancesAtMarkers(house.scene, houseMarkers, "house")}
+      {renderInstancesAtMarkers(letterbox.scene, letterboxMarkers, "letterbox")}
     </>
   );
 }
