@@ -4,7 +4,6 @@ top: 0;
 left: 0;
 width: 100%;
 height: 100%;
-background-color: black;
 }
 
 .sign-interact-button {
@@ -47,4 +46,18 @@ background-color: black;
 
 .sign-popup-close {
   align-self: flex-end;
+}
+
+.endPopup{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  animation: popupFadeIn 0.15s ease-out;
+  background-color: white;
+}
+
+.hidden {
+  display: none;
 }

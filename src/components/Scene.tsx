@@ -6,14 +6,24 @@ import { Movement } from "./Movement"
 import { Map } from "./Map"
 import { SignInteraction } from "./SignInteraction"
 import { Teleporter } from "./Teleporter"
+import { PokemonPicker } from "./PokemonPicker"
 
 type SceneProps = {
   onPopupChange: (isOpen: boolean, text?: string, type?: "sign" | "post") => void;
   isPopupOpen: boolean;
   onFadeChange: (opacity: number) => void;
+  onPokemonPopupChange: (isOpen: boolean, pokemonName?: string) => void;
+  onPokemonPick: (pokemonName: string) => void;
+  isPokemonPicked: boolean;
 };
 
-export function Scene({ onPopupChange, isPopupOpen, onFadeChange }: SceneProps) {
+export function Scene({ 
+  onPopupChange, 
+  isPopupOpen, 
+  onFadeChange, 
+  onPokemonPopupChange,
+  isPokemonPicked 
+}: SceneProps) {
   const handlePopupChange = (
     isOpen: boolean,
     text?: string,
@@ -51,10 +61,14 @@ export function Scene({ onPopupChange, isPopupOpen, onFadeChange }: SceneProps) 
       />
 
       {/* GAMEPLAY */}
-      <Movement disabled={isPopupOpen} />
+      <Movement disabled={isPopupOpen || isPokemonPicked} />
       <Map />
       <SignInteraction onPopupChange={handlePopupChange} isPopupOpen={isPopupOpen} />
       <Teleporter disabled={isPopupOpen} onFadeChange={onFadeChange} />
+      <PokemonPicker 
+        isPopupOpen={isPopupOpen}
+        onPopupChange={onPokemonPopupChange}
+      />
     </>
   )
 }
