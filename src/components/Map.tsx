@@ -1,6 +1,7 @@
 import { useGLTF } from "@react-three/drei";
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef, use } from "react";
 import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 type MarkerData = {
   position: THREE.Vector3;
@@ -12,6 +13,65 @@ const seededRandom = (x: number, z: number, salt: number = 0): number => {
   const seed = Math.sin(x * 12.9898 + z * 78.233 + salt * 37.719) * 43758.5453;
   return seed - Math.floor(seed);
 };
+
+function AnimatedModel({ 
+  model, 
+  animations,
+  position, 
+  rotation, 
+  scale, 
+  animationIndex, 
+  userData 
+}: { 
+  model: THREE.Group; 
+  animations: THREE.AnimationClip[];
+  position: THREE.Vector3; 
+  rotation: THREE.Euler; 
+  scale: THREE.Vector3; 
+  animationIndex?: number;
+  userData?: any;
+}) {
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const modelClone = useMemo(() => model.clone(), [model]);
+
+  useEffect(() => {
+    
+    if (groupRef.current && animationIndex !== undefined) {
+      if (animations && animations.length > animationIndex) {
+        const mixer = new THREE.AnimationMixer(modelClone);
+        mixerRef.current = mixer;
+
+        const clip = animations[animationIndex];
+        const action = mixer.clipAction(clip);
+        action.setLoop(THREE.LoopRepeat, Infinity);
+        action.play();
+      }
+    }
+
+    return () => {
+      if (mixerRef.current) {
+        mixerRef.current.stopAllAction();
+        mixerRef.current = null;
+      }
+    };
+  }, [modelClone, animations, animationIndex]);
+
+  useFrame((state, delta) => {
+    if (mixerRef.current) {
+      mixerRef.current.update(delta);
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={position} rotation={rotation} scale={scale}>
+      <primitive
+        object={modelClone}
+        userData={userData}
+      />
+    </group>
+  );
+}
 
 export function Map() {
   // Load models
@@ -28,6 +88,16 @@ export function Map() {
   const oakDesk = useGLTF("/models/oakDesk.glb");
   const oakStarterTable = useGLTF("/models/oakStarterTable.glb");
   const oakMachine = useGLTF("/models/oakMachine.glb");
+  const pokemon1 = useGLTF("/models/pokemons/1.glb");
+  const pokemon4 = useGLTF("/models/pokemons/4.glb");
+  const pokemon7 = useGLTF("/models/pokemons/7.glb");
+
+  useEffect(() => {
+  }, [pokemon1]);
+  useEffect(() => {
+  }, [pokemon4]);
+  useEffect(() => {
+  }, [pokemon7]);
 
   // Reusable method to locate markers
   const getMarkersFromScene = (
@@ -69,11 +139,11 @@ export function Map() {
       randomRotation?: boolean;
       heightVariation?: boolean;
       noCollision?: boolean;
+      animationIndex?: number;
+      animations?: THREE.AnimationClip[];
     },
   ) => {
     return markers.map((marker, index) => {
-      const modelClone = model.clone();
-
       const rotation = options?.randomRotation
         ? new THREE.Euler(
           marker.rotation.x,
@@ -90,6 +160,24 @@ export function Map() {
         )
         : marker.scale;
 
+      const userData = { hasCollision: !options?.noCollision };
+
+      if (options?.animationIndex !== undefined && options?.animations) {
+        return (
+          <AnimatedModel
+            key={`${keyPrefix}-${index}`}
+            model={model}
+            animations={options.animations}
+            position={marker.position}
+            rotation={rotation}
+            scale={scale}
+            animationIndex={options.animationIndex}
+            userData={userData}
+          />
+        );
+      }
+
+      const modelClone = model.clone();
       return (
         <primitive
           key={`${keyPrefix}-${index}`}
@@ -97,7 +185,7 @@ export function Map() {
           position={marker.position}
           rotation={rotation}
           scale={scale}
-          userData={{ hasCollision: !options?.noCollision }}
+          userData={userData}
         />
       );
     });
@@ -152,6 +240,18 @@ export function Map() {
     () => getMarkersFromScene(palletTown.scene, "OAKMACHINEMARKER"),
     [palletTown.scene],
   );
+  const pokemon1Markers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "POKEMON1MARKER"),
+    [palletTown.scene],
+  );
+  const pokemon4Markers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "POKEMON4MARKER"),
+    [palletTown.scene],
+  );
+  const pokemon7Markers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "POKEMON7MARKER"),
+    [palletTown.scene],
+  );
 
   return (
     <>
@@ -171,6 +271,9 @@ export function Map() {
       {renderInstancesAtMarkers(oakDesk.scene, oakDeskMarkers, "oakDesk")}
       {renderInstancesAtMarkers(oakStarterTable.scene, oakStarterTableMarkers, "oakStarterTable")}
       {renderInstancesAtMarkers(oakMachine.scene, oakMachineMarkers, "oakMachine")}
+      {renderInstancesAtMarkers(pokemon1.scene, pokemon1Markers, "pokemon1", { animationIndex: 0, animations: pokemon1.animations })}
+      {renderInstancesAtMarkers(pokemon4.scene, pokemon4Markers, "pokemon4", { animationIndex: 0, animations: pokemon4.animations })}
+      {renderInstancesAtMarkers(pokemon7.scene, pokemon7Markers, "pokemon7", { animationIndex: 0, animations: pokemon7.animations })}
     </>
   );
 }

@@ -86,9 +86,6 @@ export function Teleporter({ disabled = false, onFadeChange }: TeleporterProps) 
 
   const teleportPlayer = useCallback(async (marker: TeleportMarker) => {
     if (!marker.targetPosition || isTeleporting) {
-      if (!marker.targetPosition) {
-        console.warn(`No target position found for ${marker.name}`);
-      }
       return;
     }
 
