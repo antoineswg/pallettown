@@ -4,8 +4,21 @@ import { Perf } from "r3f-perf"
 
 import { Movement } from "./Movement"
 import { Map } from "./Map"
+import { SignInteraction } from "./SignInteraction"
 
-export function Scene() {
+type SceneProps = {
+  onPopupChange: (isOpen: boolean, text?: string, type?: "sign" | "post") => void;
+  isPopupOpen: boolean;
+};
+
+export function Scene({ onPopupChange, isPopupOpen }: SceneProps) {
+  const handlePopupChange = (
+    isOpen: boolean,
+    text?: string,
+    type?: "sign" | "post"
+  ) => {
+    onPopupChange(isOpen, text, type);
+  };
 
   const { showPerf } = useControls('Performance', {
     showPerf: { label: "Show Performances", value: false },
@@ -36,8 +49,9 @@ export function Scene() {
       />
 
       {/* GAMEPLAY */}
-      <Movement />
+      <Movement disabled={isPopupOpen} />
       <Map />
+      <SignInteraction onPopupChange={handlePopupChange} isPopupOpen={isPopupOpen} />
     </>
   )
 }

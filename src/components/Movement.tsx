@@ -2,7 +2,11 @@ import { useThree, useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-export function Movement() {
+type MovementProps = {
+  disabled?: boolean;
+};
+
+export function Movement({ disabled = false }: MovementProps) {
   const { camera, gl, scene } = useThree();
 
   const moveSpeed = 3;
@@ -22,6 +26,7 @@ export function Movement() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (disabled) return;
       keysPressed.current.add(e.code);
       // Jump
       if (e.code === "Space" && isOnGround.current) {
@@ -34,6 +39,7 @@ export function Movement() {
     };
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (disabled) return;
       if (document.pointerLockElement === gl.domElement) {
         euler.current.setFromQuaternion(camera.quaternion);
         euler.current.y -= e.movementX * lookSpeed;
@@ -47,8 +53,15 @@ export function Movement() {
     };
 
     const handleClick = () => {
+      if (disabled) return;
       gl.domElement.requestPointerLock();
     };
+
+    // Release pointer lock when disabled
+    if (disabled && document.pointerLockElement === gl.domElement) {
+      document.exitPointerLock();
+      keysPressed.current.clear();
+    }
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
@@ -61,9 +74,11 @@ export function Movement() {
       document.removeEventListener("mousemove", handleMouseMove);
       gl.domElement.removeEventListener("click", handleClick);
     };
-  }, [camera, gl]);
+  }, [camera, gl, disabled]);
 
   useFrame((_state, delta) => {
+    if (disabled) return;
+
     // Prevents fall when alt+tab
     delta = Math.min(delta, 0.1);
 
@@ -199,10 +214,8 @@ export function Movement() {
         let obj = intersect.object;
         while (obj) {
           if (obj.userData.hasCollision === true) {
-            // Return the normal of the surface we hit
             const normal =
               intersect.face?.normal.clone() || dir.clone().negate();
-            // Transform normal to world space
             normal.transformDirection(intersect.object.matrixWorld);
             normal.normalize();
             return { normal };
