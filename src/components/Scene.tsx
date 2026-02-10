@@ -7,6 +7,7 @@ import { Map } from "./Map"
 import { SignInteraction } from "./SignInteraction"
 import { Teleporter } from "./Teleporter"
 import { PokemonPicker } from "./PokemonPicker"
+import { Messages } from "./Messages"
 
 type SceneProps = {
   onPopupChange: (isOpen: boolean, text?: string, type?: "sign" | "post") => void;
@@ -69,6 +70,7 @@ export function Scene({
         isPopupOpen={isPopupOpen}
         onPopupChange={onPokemonPopupChange}
       />
+      <Messages isPopupOpen={isPopupOpen} />
     </>
   )
 }
