@@ -52,7 +52,6 @@ function App() {
 
   return (
     <div className="canvas-container" ref={canvasRef}>
-      {/* Overlay de fondu au noir */}
       <div
         style={{
           position: 'fixed',

@@ -8,6 +8,11 @@ type MarkerData = {
   scale: THREE.Vector3;
 };
 
+const seededRandom = (x: number, z: number, salt: number = 0): number => {
+  const seed = Math.sin(x * 12.9898 + z * 78.233 + salt * 37.719) * 43758.5453;
+  return seed - Math.floor(seed);
+};
+
 export function Map() {
   // Load models
   const palletTown = useGLTF("/models/palletTown.glb");
@@ -19,6 +24,10 @@ export function Map() {
   const lab = useGLTF("/models/lab.glb");
   const house = useGLTF("/models/house.glb");
   const letterbox = useGLTF("/models/letterbox.glb");
+  const oakBookcase = useGLTF("/models/oakBookcase.glb");
+  const oakDesk = useGLTF("/models/oakDesk.glb");
+  const oakStarterTable = useGLTF("/models/oakStarterTable.glb");
+  const oakMachine = useGLTF("/models/oakMachine.glb");
 
   // Reusable method to locate markers
   const getMarkersFromScene = (
@@ -65,20 +74,18 @@ export function Map() {
     return markers.map((marker, index) => {
       const modelClone = model.clone();
 
-      // Apply rotation randomness
       const rotation = options?.randomRotation
         ? new THREE.Euler(
           marker.rotation.x,
-          Math.random() * Math.PI * 2,
+          seededRandom(marker.position.x, marker.position.z, 0) * Math.PI * 2,
           marker.rotation.z,
         )
         : marker.rotation;
 
-      // Apply height randomness
       const scale = options?.heightVariation
         ? new THREE.Vector3(
           marker.scale.x,
-          marker.scale.y * (0.9 + Math.random() * 0.2),
+          marker.scale.y * (0.9 + seededRandom(marker.position.x, marker.position.z, 1) * 0.2),
           marker.scale.z,
         )
         : marker.scale;
@@ -129,6 +136,22 @@ export function Map() {
     () => getMarkersFromScene(palletTown.scene, "LETTERBOXMARKER"),
     [palletTown.scene],
   );
+  const oakBookcaseMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "OAKBOOKCASEMARKER"),
+    [palletTown.scene],
+  );
+  const oakDeskMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "OAKDESKMARKER"),
+    [palletTown.scene],
+  );
+  const oakStarterTableMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "OAKSTARTERTABLEMARKER"),
+    [palletTown.scene],
+  );
+  const oakMachineMarkers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "OAKMACHINEMARKER"),
+    [palletTown.scene],
+  );
 
   return (
     <>
@@ -136,14 +159,18 @@ export function Map() {
       <primitive object={palletTown.scene} userData={{ hasCollision: true }} />
 
       {/* Place all objects at their markers */}
-      {renderInstancesAtMarkers(tree.scene, treeMarkers, "tree")}
-      {renderInstancesAtMarkers(flowerPatch.scene, flowerMarkers,"flowerPatch")}
+      {renderInstancesAtMarkers(tree.scene, treeMarkers, "tree", { heightVariation: true, randomRotation: true })}
+      {renderInstancesAtMarkers(flowerPatch.scene, flowerMarkers,"flowerPatch", { noCollision: true, heightVariation: true, randomRotation: true })}
       {renderInstancesAtMarkers(fence.scene, fenceMarkers, "fence")}
       {renderInstancesAtMarkers(sign.scene, signMarkers, "sign")}
       {renderInstancesAtMarkers(signPost.scene, signPostMarkers, "signPost")}
       {renderInstancesAtMarkers(lab.scene, labMarkers, "lab")}
       {renderInstancesAtMarkers(house.scene, houseMarkers, "house")}
       {renderInstancesAtMarkers(letterbox.scene, letterboxMarkers, "letterbox")}
+      {renderInstancesAtMarkers(oakBookcase.scene, oakBookcaseMarkers, "oakBookcase")}
+      {renderInstancesAtMarkers(oakDesk.scene, oakDeskMarkers, "oakDesk")}
+      {renderInstancesAtMarkers(oakStarterTable.scene, oakStarterTableMarkers, "oakStarterTable")}
+      {renderInstancesAtMarkers(oakMachine.scene, oakMachineMarkers, "oakMachine")}
     </>
   );
 }
