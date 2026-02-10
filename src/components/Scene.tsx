@@ -5,13 +5,15 @@ import { Perf } from "r3f-perf"
 import { Movement } from "./Movement"
 import { Map } from "./Map"
 import { SignInteraction } from "./SignInteraction"
+import { Teleporter } from "./Teleporter"
 
 type SceneProps = {
   onPopupChange: (isOpen: boolean, text?: string, type?: "sign" | "post") => void;
   isPopupOpen: boolean;
+  onFadeChange: (opacity: number) => void;
 };
 
-export function Scene({ onPopupChange, isPopupOpen }: SceneProps) {
+export function Scene({ onPopupChange, isPopupOpen, onFadeChange }: SceneProps) {
   const handlePopupChange = (
     isOpen: boolean,
     text?: string,
@@ -52,6 +54,7 @@ export function Scene({ onPopupChange, isPopupOpen }: SceneProps) {
       <Movement disabled={isPopupOpen} />
       <Map />
       <SignInteraction onPopupChange={handlePopupChange} isPopupOpen={isPopupOpen} />
+      <Teleporter disabled={isPopupOpen} onFadeChange={onFadeChange} />
     </>
   )
 }

@@ -10,6 +10,7 @@ function App() {
     text?: string;
     type?: "sign" | "post";
   }>({ isOpen: false });
+  const [fadeOpacity, setFadeOpacity] = useState(0);
   const previousPopupState = useRef(false);
 
   const handlePopupChange = (
@@ -51,6 +52,22 @@ function App() {
 
   return (
     <div className="canvas-container" ref={canvasRef}>
+      {/* Overlay de fondu au noir */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'black',
+          opacity: fadeOpacity,
+          transition: 'opacity 0.5s ease-in-out',
+          pointerEvents: 'none',
+          zIndex: 1000,
+        }}
+      />
+
       <Canvas
         camera={{
           fov: 75,
@@ -59,7 +76,11 @@ function App() {
           position: [0, 1, 5],
         }}
       >
-        <Scene onPopupChange={handlePopupChange} isPopupOpen={popupData.isOpen} />
+        <Scene 
+          onPopupChange={handlePopupChange} 
+          isPopupOpen={popupData.isOpen}
+          onFadeChange={setFadeOpacity}
+        />
       </Canvas>
       
       {popupData.isOpen && popupData.type && (
