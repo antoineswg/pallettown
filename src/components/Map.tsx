@@ -91,6 +91,7 @@ export function Map() {
   const pokemon1 = useGLTF("/models/pokemons/1.glb");
   const pokemon4 = useGLTF("/models/pokemons/4.glb");
   const pokemon7 = useGLTF("/models/pokemons/7.glb");
+  const pokemon143 = useGLTF("/models/pokemons/143.glb");
 
   useEffect(() => {
   }, [pokemon1]);
@@ -252,6 +253,10 @@ export function Map() {
     () => getMarkersFromScene(palletTown.scene, "POKEMON7MARKER"),
     [palletTown.scene],
   );
+  const pokemon143Markers = useMemo(
+    () => getMarkersFromScene(palletTown.scene, "POKEMON143MARKER"),
+    [palletTown.scene],
+  );
 
   return (
     <>
@@ -274,6 +279,7 @@ export function Map() {
       {renderInstancesAtMarkers(pokemon1.scene, pokemon1Markers, "pokemon1", { animationIndex: 0, animations: pokemon1.animations })}
       {renderInstancesAtMarkers(pokemon4.scene, pokemon4Markers, "pokemon4", { animationIndex: 0, animations: pokemon4.animations })}
       {renderInstancesAtMarkers(pokemon7.scene, pokemon7Markers, "pokemon7", { animationIndex: 0, animations: pokemon7.animations })}
+      {renderInstancesAtMarkers(pokemon143.scene, pokemon143Markers, "pokemon143", { animationIndex: 6, animations: pokemon143.animations })}
     </>
   );
 }
