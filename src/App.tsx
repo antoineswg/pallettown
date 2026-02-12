@@ -1,7 +1,8 @@
 import "./App.css";
 import { Canvas } from "@react-three/fiber";
 import { Scene } from "./components/Scene";
-import { useState, useEffect, useRef } from "react";
+import { LoadingScreen } from "./components/LoadingScreen";
+import { Suspense, useState, useEffect, useRef } from "react";
 
 function App() {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -17,6 +18,15 @@ function App() {
   const [isPokemonPicked, setIsPokemonPicked] = useState(false);
   const [fadeOpacity, setFadeOpacity] = useState(0);
   const previousPopupState = useRef(false);
+
+  const handleLoadingComplete = () => {
+    const canvas = canvasRef.current?.querySelector("canvas");
+    if (canvas) {
+      setTimeout(() => {
+        canvas.requestPointerLock();
+      }, 100);
+    }
+  };
 
   const handlePopupChange = (
     isOpen: boolean,
@@ -44,7 +54,7 @@ function App() {
     const endPopup = document.querySelector('.endPopup');
     if (endPopup) {
       endPopup.classList.remove('hidden');
-      endPopup.innerHTML = `You picked ${pokemonName} as your starter! You are now ready to go explore the world of Pokémon. <br /><br />Made with &lt;3 by antoine, every model made by myself except the pokemons that are from the cobblemon gitlab :) <br /><br /><button type="button" onclick="window.location.reload()">Restart</button>`;
+      endPopup.innerHTML = `You picked ${pokemonName} as your starter! You are now ready to go explore the world of Pokémon.`;
     }
   };
 
@@ -81,6 +91,7 @@ function App() {
 
   return (
     <div className="canvas-container" ref={canvasRef}>
+      <LoadingScreen onLoadingComplete={handleLoadingComplete} />
       <div className="endPopup hidden"></div>
       <div
         style={{
@@ -105,14 +116,16 @@ function App() {
           position: [0, 1, 5],
         }}
       >
-        <Scene 
-          onPopupChange={handlePopupChange} 
-          isPopupOpen={popupData.isOpen || pokemonPopupData.isOpen}
-          onFadeChange={setFadeOpacity}
-          onPokemonPopupChange={handlePokemonPopupChange}
-          onPokemonPick={handlePokemonPick}
-          isPokemonPicked={isPokemonPicked}
-        />
+        <Suspense fallback={null}>
+          <Scene 
+            onPopupChange={handlePopupChange} 
+            isPopupOpen={popupData.isOpen || pokemonPopupData.isOpen}
+            onFadeChange={setFadeOpacity}
+            onPokemonPopupChange={handlePokemonPopupChange}
+            onPokemonPick={handlePokemonPick}
+            isPokemonPicked={isPokemonPicked}
+          />
+        </Suspense>
       </Canvas>
       
       {popupData.isOpen && popupData.type && (
