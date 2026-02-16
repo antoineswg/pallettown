@@ -15,15 +15,25 @@ function App() {
     isOpen: boolean;
     pokemonName?: string;
   }>({ isOpen: false });
+  const [endScreenData, setEndScreenData] = useState<{
+    isOpen: boolean;
+    pokemonName?: string;
+  }>({ isOpen: false });
   const [isPokemonPicked, setIsPokemonPicked] = useState(false);
   const [fadeOpacity, setFadeOpacity] = useState(0);
   const previousPopupState = useRef(false);
+  const pointerLockTimeoutRef = useRef<number | null>(null);
 
   const handleLoadingComplete = () => {
     const canvas = canvasRef.current?.querySelector("canvas");
     if (canvas) {
-      setTimeout(() => {
-        canvas.requestPointerLock();
+      pointerLockTimeoutRef.current = window.setTimeout(() => {
+        const anyPopupOpen =
+          popupData.isOpen || pokemonPopupData.isOpen || endScreenData.isOpen;
+        if (!anyPopupOpen) {
+          canvas.requestPointerLock();
+        }
+        pointerLockTimeoutRef.current = null;
       }, 100);
     }
   };
@@ -31,7 +41,7 @@ function App() {
   const handlePopupChange = (
     isOpen: boolean,
     text?: string,
-    type?: "sign" | "post"
+    type?: "sign" | "post",
   ) => {
     setPopupData({ isOpen, text, type });
   };
@@ -47,15 +57,10 @@ function App() {
   const handlePokemonPick = (pokemonName: string) => {
     // Close pokemon picker popup
     setPokemonPopupData({ isOpen: false });
-    
+
     // Disable movement
     setIsPokemonPicked(true);
-    
-    const endPopup = document.querySelector('.endPopup');
-    if (endPopup) {
-      endPopup.classList.remove('hidden');
-      endPopup.innerHTML = `You picked ${pokemonName} as your starter! You are now ready to go explore the world of Pokémon.`;
-    }
+    setEndScreenData({ isOpen: true, pokemonName });
   };
 
   useEffect(() => {
@@ -77,33 +82,40 @@ function App() {
   }, [popupData.isOpen, pokemonPopupData.isOpen]);
 
   useEffect(() => {
-    const anyPopupOpen = popupData.isOpen || pokemonPopupData.isOpen;
-    if (previousPopupState.current && !anyPopupOpen) {
+    const anyPopupOpen =
+      popupData.isOpen || pokemonPopupData.isOpen || endScreenData.isOpen;
+
+    if (anyPopupOpen && pointerLockTimeoutRef.current !== null) {
+      clearTimeout(pointerLockTimeoutRef.current);
+      pointerLockTimeoutRef.current = null;
+    }
+
+    if (previousPopupState.current && !anyPopupOpen && !endScreenData.isOpen) {
       const canvas = canvasRef.current?.querySelector("canvas");
       if (canvas) {
-        setTimeout(() => {
+        pointerLockTimeoutRef.current = window.setTimeout(() => {
           canvas.requestPointerLock();
+          pointerLockTimeoutRef.current = null;
         }, 100);
       }
     }
     previousPopupState.current = anyPopupOpen;
-  }, [popupData.isOpen, pokemonPopupData.isOpen]);
+  }, [popupData.isOpen, pokemonPopupData.isOpen, endScreenData.isOpen]);
 
   return (
     <div className="canvas-container" ref={canvasRef}>
       <LoadingScreen onLoadingComplete={handleLoadingComplete} />
-      <div className="endPopup hidden"></div>
       <div
         style={{
-          position: 'fixed',
+          position: "fixed",
           top: 0,
           left: 0,
-          width: '100vw',
-          height: '100vh',
-          backgroundColor: 'black',
+          width: "100vw",
+          height: "100vh",
+          backgroundColor: "black",
           opacity: fadeOpacity,
-          transition: 'opacity 0.5s ease-in-out',
-          pointerEvents: 'none',
+          transition: "opacity 0.5s ease-in-out",
+          pointerEvents: "none",
           zIndex: 1000,
         }}
       />
@@ -117,9 +129,13 @@ function App() {
         }}
       >
         <Suspense fallback={null}>
-          <Scene 
-            onPopupChange={handlePopupChange} 
-            isPopupOpen={popupData.isOpen || pokemonPopupData.isOpen}
+          <Scene
+            onPopupChange={handlePopupChange}
+            isPopupOpen={
+              popupData.isOpen ||
+              pokemonPopupData.isOpen ||
+              endScreenData.isOpen
+            }
             onFadeChange={setFadeOpacity}
             onPokemonPopupChange={handlePokemonPopupChange}
             onPokemonPick={handlePokemonPick}
@@ -127,12 +143,10 @@ function App() {
           />
         </Suspense>
       </Canvas>
-      
+
       {popupData.isOpen && popupData.type && (
         <div
-          className={
-            popupData.type === "post" ? "postSignPopup" : "signPopup"
-          }
+          className={popupData.type === "post" ? "postSignPopup" : "signPopup"}
           role="dialog"
           aria-live="polite"
         >
@@ -148,11 +162,7 @@ function App() {
       )}
 
       {pokemonPopupData.isOpen && pokemonPopupData.pokemonName && (
-        <div
-          className="signPopup"
-          role="dialog"
-          aria-live="polite"
-        >
+        <div className="signPopup" role="dialog" aria-live="polite">
           <p>Are you sure you want to pick {pokemonPopupData.pokemonName}?</p>
           <button
             className="sign-popup-close"
@@ -165,9 +175,21 @@ function App() {
             className="sign-popup-close"
             type="button"
             onClick={() => setPokemonPopupData({ isOpen: false })}
-            style={{ marginLeft: '10px' }}
+            style={{ marginLeft: "10px" }}
           >
             No
+          </button>
+        </div>
+      )}
+
+      {endScreenData.isOpen && endScreenData.pokemonName && (
+        <div className="signPopup">
+          <p>
+            You picked {endScreenData.pokemonName} as your starter! You are now
+            ready to go explore the world of Pokémon.
+          </p>
+          <button type="button" onClick={() => window.location.reload()}>
+            Restart
           </button>
         </div>
       )}

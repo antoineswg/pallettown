@@ -57,7 +57,6 @@ export function Movement({ disabled = false }: MovementProps) {
       gl.domElement.requestPointerLock();
     };
 
-    // Release pointer lock when disabled
     if (disabled && document.pointerLockElement === gl.domElement) {
       document.exitPointerLock();
       keysPressed.current.clear();
@@ -66,7 +65,10 @@ export function Movement({ disabled = false }: MovementProps) {
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
     document.addEventListener("mousemove", handleMouseMove);
-    gl.domElement.addEventListener("click", handleClick);
+
+    if (!disabled) {
+      gl.domElement.addEventListener("click", handleClick);
+    }
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
