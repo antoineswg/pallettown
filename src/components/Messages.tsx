@@ -13,7 +13,6 @@ type MessageMarkerData = {
 const MessagesContent: Record<number, string> = {
   1: "I'm Red's mom",
   2: "I'm Blue's mom",
-  
 };
 
 type MessagesProps = {
@@ -23,16 +22,18 @@ type MessagesProps = {
 export function Messages({ isPopupOpen }: MessagesProps) {
   const { camera } = useThree();
   const palletTown = useGLTF("/models/palletTown.glb");
-  const [markerDistances, setMarkerDistances] = useState<Record<string, number>>({});
+  const [markerDistances, setMarkerDistances] = useState<
+    Record<string, number>
+  >({});
 
   const markers = useMemo<MessageMarkerData[]>(() => {
     const messageMarkers: MessageMarkerData[] = [];
 
     palletTown.scene.traverse((child) => {
       const nameLower = child.name.toLowerCase();
-      
+
       const messageMatch = nameLower.match(/message(\d+)marker/);
-      
+
       if (messageMatch) {
         const messageNumber = Number(messageMatch[1]);
         const worldPosition = new THREE.Vector3();
@@ -69,20 +70,24 @@ export function Messages({ isPopupOpen }: MessagesProps) {
       {markers.map((marker) => {
         const distance = markerDistances[marker.id] ?? 999;
         const isInRange = distance < maxDistance;
-        const distanceRatio = Math.max(0, Math.min(1, (maxDistance - distance) / (maxDistance - minDistance)));
+        const distanceRatio = Math.max(
+          0,
+          Math.min(1, (maxDistance - distance) / (maxDistance - minDistance)),
+        );
         const scale = 0.3 + distanceRatio * 0.7;
-        
+
         const opacityThreshold = 0.6;
-        const opacityFalloff = distanceRatio > opacityThreshold 
-          ? 1 
-          : Math.pow(distanceRatio / opacityThreshold, 3);
+        const opacityFalloff =
+          distanceRatio > opacityThreshold
+            ? 1
+            : Math.pow(distanceRatio / opacityThreshold, 3);
 
         return (
           <group key={marker.id} position={marker.position}>
             {isInRange && !isPopupOpen && (
               <Html center distanceFactor={8} zIndexRange={[0, 100]}>
                 <div
-                  className="message"
+                  className="speech"
                   style={{
                     transform: `scale(${scale})`,
                     opacity: opacityFalloff,

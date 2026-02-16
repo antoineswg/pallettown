@@ -1,9 +1,11 @@
+
+
 .canvas-container {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .sign-interact-button {
@@ -32,6 +34,7 @@ height: 100%;
     opacity: 0;
     transform: translate(-50%, -48%);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, -50%);
@@ -42,7 +45,7 @@ height: 100%;
   align-self: flex-end;
 }
 
-.endPopup{
+.endPopup {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -62,4 +65,50 @@ height: 100%;
   max-width: 500px;
   min-width: 200px;
   width: max-content;
+}
+
+
+
+.speech {
+  font-size: .75rem;
+  border-style: solid;
+  border-width: 16px;
+  border-image-source: url('/loading/speech.png');
+  border-image-repeat: repeat;
+  border-image-slice: 33% fill;
+  image-rendering: pixelated;
+  padding: 10px;
+  width: 400px;
+  height: fit-content;
+  min-height: 2rem;
+  margin-bottom: 5rem;
+  line-height: 1.5;
+  position: relative;
+}
+
+.speech-arrow {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 1rem;
+  animation: arrowBlink 1s infinite;
+}
+
+@keyframes arrowBlink {
+
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (width<768px) {
+  .speech {
+    width: 300px;
+  }
 }
