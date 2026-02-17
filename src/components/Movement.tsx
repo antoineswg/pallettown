@@ -6,9 +6,10 @@ type MovementProps = {
   disabled?: boolean;
   joystickX?: number;
   joystickY?: number;
+  shouldJump?: boolean;
 };
 
-export function Movement({ disabled = false, joystickX = 0, joystickY = 0 }: MovementProps) {
+export function Movement({ disabled = false, joystickX = 0, joystickY = 0, shouldJump = false }: MovementProps) {
   const { camera, gl, scene } = useThree();
 
   const moveSpeed = 3;
@@ -29,12 +30,18 @@ export function Movement({ disabled = false, joystickX = 0, joystickY = 0 }: Mov
   const lastTouchY = useRef(0);
   const isTouchMoving = useRef(false);
   const joystickDirection = useRef({ x: 0, y: 0 });
+  const previousJumpState = useRef(false);
 
   useEffect(() => {
     joystickDirection.current = { x: joystickX, y: joystickY };
-    if (joystickX !== 0 || joystickY !== 0) {
-    }
   }, [joystickX, joystickY]);
+
+  useEffect(() => {
+    if (shouldJump && !previousJumpState.current && isOnGround.current && !disabled) {
+      verticalVelocity.current = jumpForce;
+    }
+    previousJumpState.current = shouldJump;
+  }, [shouldJump, disabled, jumpForce]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,8 +80,13 @@ export function Movement({ disabled = false, joystickX = 0, joystickY = 0 }: Mov
       if (disabled) return;
       if (e.touches.length === 1) {
         const touch = e.touches[0];
-        const joystickArea = 180; 
-        if (touch.clientX < joystickArea && touch.clientY > window.innerHeight - joystickArea) {
+        const controlsArea = 200; 
+        const isInJoystickArea = touch.clientX > window.innerWidth - controlsArea && 
+                                  touch.clientY > window.innerHeight - controlsArea;
+        const isInJumpButtonArea = touch.clientX < controlsArea && 
+                                    touch.clientY > window.innerHeight - controlsArea;
+        
+        if (isInJoystickArea || isInJumpButtonArea) {
           return;
         }
         lastTouchX.current = touch.clientX;

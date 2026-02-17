@@ -48,7 +48,7 @@ export function MobileControls({ onDirectionChange, disabled = false }: MobileCo
       style={{
         position: 'fixed',
         bottom: '60px',
-        right: '60px',
+        right: '40px',
         zIndex: 1000,
         pointerEvents: disabled ? 'none' : 'auto',
         opacity: disabled ? 0.5 : 1,
