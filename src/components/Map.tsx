@@ -147,6 +147,11 @@ export function Map() {
         marker: "POKEMON120MARKER",
         options: { animationIndex: 4 },
       },
+      pokemon90: {
+        path: "/models/pokemons/90.glb",
+        marker: "POKEMON90MARKER",
+        options: { animationIndex: 5 },
+      },
     }),
     [],
   );
