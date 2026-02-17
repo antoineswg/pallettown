@@ -152,6 +152,16 @@ export function Map() {
         marker: "POKEMON90MARKER",
         options: { animationIndex: 5 },
       },
+      pokemon12: {
+        path: "/models/pokemons/12.glb",
+        marker: "POKEMON12MARKER",
+        options: { animationIndex: 0, heightVariation: true },
+      },
+      pokemon16: {
+        path: "/models/pokemons/16.glb",
+        marker: "POKEMON16MARKER",
+        options: { animationIndex: 0, heightVariation: true },
+      },
     }),
     [],
   );
