@@ -11,8 +11,11 @@ type MessageMarkerData = {
 };
 
 const MessagesContent: Record<number, string> = {
-  1: "I'm Red's mom",
-  2: "I'm Blue's mom",
+  1: "Hey sweetie ! I heard Professor Oak was giving Pokémons to young aspiring trainers, why don't you go meet him in his lab ?",
+  2: "Are you looking for Blue ? He told me he would be at Professor Oak's lab, maybe you could meet him there ?",
+  3: "A sleeping POKéMON blocks the way!",
+  4: "Finally you're here ! I'm still wondering which Pokémon to choose... Go ahead and pick one, maybe that will help unblock me.",
+  5: "I knew you'd come ! I have three special Pokémons for you today, but I can only give you one. Choose wisely !",
 };
 
 type MessagesProps = {
@@ -93,7 +96,7 @@ export function Messages({ isPopupOpen }: MessagesProps) {
                     opacity: opacityFalloff,
                   }}
                 >
-                  {marker.message}
+                  <div dangerouslySetInnerHTML={{ __html: marker.message }} />
                 </div>
               </Html>
             )}
