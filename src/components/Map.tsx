@@ -27,20 +27,20 @@ const seededRandom = (x: number, z: number, salt: number = 0): number => {
   return seed - Math.floor(seed);
 };
 
-function AnimatedModel({ 
-  model, 
+function AnimatedModel({
+  model,
   animations,
-  position, 
-  rotation, 
-  scale, 
-  animationIndex, 
-  userData 
-}: { 
-  model: THREE.Group; 
+  position,
+  rotation,
+  scale,
+  animationIndex,
+  userData,
+}: {
+  model: THREE.Group;
   animations: THREE.AnimationClip[];
-  position: THREE.Vector3; 
-  rotation: THREE.Euler; 
-  scale: THREE.Vector3; 
+  position: THREE.Vector3;
+  rotation: THREE.Euler;
+  scale: THREE.Vector3;
   animationIndex: number;
   userData?: any;
 }) {
@@ -87,30 +87,78 @@ export function Map() {
   const palletTown = useGLTF("/models/palletTown.glb");
 
   // Models configs
-  const modelConfigs: Record<string, ModelConfig> = useMemo(() => ({
-    tree: { path: "/models/tree.glb", marker: "TREEMARKER", options: { heightVariation: true, randomRotation: true } },
-    flowerPatch: { path: "/models/flowerPatch.glb", marker: "FLOWERPATCHMARKER", options: { noCollision: true, heightVariation: true, randomRotation: true } },
-    fence: { path: "/models/fence.glb", marker: "FENCEMARKER" },
-    sign: { path: "/models/sign.glb", marker: "SIGNMARKER" },
-    signPost: { path: "/models/signPost.glb", marker: "SIGNPOSTMARKER" },
-    lab: { path: "/models/lab.glb", marker: "LABMARKER" },
-    house: { path: "/models/house.glb", marker: "HOUSEMARKER" },
-    letterbox: { path: "/models/letterbox.glb", marker: "LETTERBOXMARKER" },
-    oakBookcase: { path: "/models/oakBookcase.glb", marker: "OAKBOOKCASEMARKER" },
-    oakDesk: { path: "/models/oakDesk.glb", marker: "OAKDESKMARKER" },
-    oakStarterTable: { path: "/models/oakStarterTable.glb", marker: "OAKSTARTERTABLEMARKER" },
-    oakMachine: { path: "/models/oakMachine.glb", marker: "OAKMACHINEMARKER" },
-    pokemon1: { path: "/models/pokemons/1.glb", marker: "POKEMON1MARKER", options: { animationIndex: 0 } },
-    pokemon4: { path: "/models/pokemons/4.glb", marker: "POKEMON4MARKER", options: { animationIndex: 0 } },
-    pokemon7: { path: "/models/pokemons/7.glb", marker: "POKEMON7MARKER", options: { animationIndex: 0 } },
-    pokemon143: { path: "/models/pokemons/143.glb", marker: "POKEMON143MARKER", options: { animationIndex: 6 } },
-  }), []);
+  const modelConfigs: Record<string, ModelConfig> = useMemo(
+    () => ({
+      tree: {
+        path: "/models/tree.glb",
+        marker: "TREEMARKER",
+        options: { heightVariation: true, randomRotation: true },
+      },
+      flowerPatch: {
+        path: "/models/flowerPatch.glb",
+        marker: "FLOWERPATCHMARKER",
+        options: {
+          noCollision: true,
+          heightVariation: true,
+          randomRotation: true,
+        },
+      },
+      fence: { path: "/models/fence.glb", marker: "FENCEMARKER" },
+      sign: { path: "/models/sign.glb", marker: "SIGNMARKER" },
+      signPost: { path: "/models/signPost.glb", marker: "SIGNPOSTMARKER" },
+      lab: { path: "/models/lab.glb", marker: "LABMARKER" },
+      house: { path: "/models/house.glb", marker: "HOUSEMARKER" },
+      letterbox: { path: "/models/letterbox.glb", marker: "LETTERBOXMARKER" },
+      oakBookcase: {
+        path: "/models/oakBookcase.glb",
+        marker: "OAKBOOKCASEMARKER",
+      },
+      oakDesk: { path: "/models/oakDesk.glb", marker: "OAKDESKMARKER" },
+      oakStarterTable: {
+        path: "/models/oakStarterTable.glb",
+        marker: "OAKSTARTERTABLEMARKER",
+      },
+      oakMachine: {
+        path: "/models/oakMachine.glb",
+        marker: "OAKMACHINEMARKER",
+      },
+      pokemon1: {
+        path: "/models/pokemons/1.glb",
+        marker: "POKEMON1MARKER",
+        options: { animationIndex: 0 },
+      },
+      pokemon4: {
+        path: "/models/pokemons/4.glb",
+        marker: "POKEMON4MARKER",
+        options: { animationIndex: 0 },
+      },
+      pokemon7: {
+        path: "/models/pokemons/7.glb",
+        marker: "POKEMON7MARKER",
+        options: { animationIndex: 0 },
+      },
+      pokemon143: {
+        path: "/models/pokemons/143.glb",
+        marker: "POKEMON143MARKER",
+        options: { animationIndex: 6 },
+      },
+      pokemon120: {
+        path: "/models/pokemons/120.glb",
+        marker: "POKEMON120MARKER",
+        options: { animationIndex: 4 },
+      },
+    }),
+    [],
+  );
 
   // Load models
-  const modelPaths = useMemo(() => Object.values(modelConfigs).map((c) => c.path), [modelConfigs]);
+  const modelPaths = useMemo(
+    () => Object.values(modelConfigs).map((c) => c.path),
+    [modelConfigs],
+  );
   const loadedModels = useGLTF(modelPaths) as any[];
 
-  // Marker extraction 
+  // Marker extraction
   const getMarkersFromScene = (markerName: string): MarkerData[] => {
     const markers: MarkerData[] = [];
     palletTown.scene.traverse((child) => {
@@ -148,16 +196,21 @@ export function Map() {
           const rotation = options.randomRotation
             ? new THREE.Euler(
                 marker.rotation.x,
-                seededRandom(marker.position.x, marker.position.z, 0) * Math.PI * 2,
-                marker.rotation.z
+                seededRandom(marker.position.x, marker.position.z, 0) *
+                  Math.PI *
+                  2,
+                marker.rotation.z,
               )
             : marker.rotation;
 
           const scale = options.heightVariation
             ? new THREE.Vector3(
                 marker.scale.x,
-                marker.scale.y * (0.9 + seededRandom(marker.position.x, marker.position.z, 1) * 0.2),
-                marker.scale.z
+                marker.scale.y *
+                  (0.9 +
+                    seededRandom(marker.position.x, marker.position.z, 1) *
+                      0.2),
+                marker.scale.z,
               )
             : marker.scale;
 
