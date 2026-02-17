@@ -122,6 +122,9 @@ export function Map() {
         path: "/models/oakMachine.glb",
         marker: "OAKMACHINEMARKER",
       },
+      npcMom: { path: "/models/npc/npcMom.glb", marker: "NPCMOMMARKER" },
+      npcBlue: { path: "/models/npc/npcBlue.glb", marker: "NPCBLUEMARKER" },
+      npcOak: { path: "/models/npc/npcOak.glb", marker: "NPCOAKMARKER" },
       pokemon1: {
         path: "/models/pokemons/1.glb",
         marker: "POKEMON1MARKER",
