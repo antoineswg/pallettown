@@ -4,9 +4,11 @@ import * as THREE from "three";
 
 type MovementProps = {
   disabled?: boolean;
+  joystickX?: number;
+  joystickY?: number;
 };
 
-export function Movement({ disabled = false }: MovementProps) {
+export function Movement({ disabled = false, joystickX = 0, joystickY = 0 }: MovementProps) {
   const { camera, gl, scene } = useThree();
 
   const moveSpeed = 3;
@@ -23,6 +25,16 @@ export function Movement({ disabled = false }: MovementProps) {
   const verticalVelocity = useRef(0);
   const isOnGround = useRef(false);
   const raycaster = useRef(new THREE.Raycaster());
+  const lastTouchX = useRef(0);
+  const lastTouchY = useRef(0);
+  const isTouchMoving = useRef(false);
+  const joystickDirection = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    joystickDirection.current = { x: joystickX, y: joystickY };
+    if (joystickX !== 0 || joystickY !== 0) {
+    }
+  }, [joystickX, joystickY]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,6 +69,45 @@ export function Movement({ disabled = false }: MovementProps) {
       gl.domElement.requestPointerLock();
     };
 
+    const handleTouchStart = (e: TouchEvent) => {
+      if (disabled) return;
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const joystickArea = 180; 
+        if (touch.clientX < joystickArea && touch.clientY > window.innerHeight - joystickArea) {
+          return;
+        }
+        lastTouchX.current = touch.clientX;
+        lastTouchY.current = touch.clientY;
+        isTouchMoving.current = true;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (disabled || !isTouchMoving.current) return;
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - lastTouchX.current;
+        const deltaY = touch.clientY - lastTouchY.current;
+
+        euler.current.setFromQuaternion(camera.quaternion);
+        euler.current.y -= deltaX * lookSpeed;
+        euler.current.x -= deltaY * lookSpeed;
+        euler.current.x = Math.max(
+          -Math.PI / 2,
+          Math.min(Math.PI / 2, euler.current.x),
+        );
+        camera.quaternion.setFromEuler(euler.current);
+
+        lastTouchX.current = touch.clientX;
+        lastTouchY.current = touch.clientY;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      isTouchMoving.current = false;
+    };
+
     if (disabled && document.pointerLockElement === gl.domElement) {
       document.exitPointerLock();
       keysPressed.current.clear();
@@ -65,6 +116,9 @@ export function Movement({ disabled = false }: MovementProps) {
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
     document.addEventListener("mousemove", handleMouseMove);
+    gl.domElement.addEventListener("touchstart", handleTouchStart, { passive: false });
+    gl.domElement.addEventListener("touchmove", handleTouchMove, { passive: false });
+    gl.domElement.addEventListener("touchend", handleTouchEnd);
 
     if (!disabled) {
       gl.domElement.addEventListener("click", handleClick);
@@ -75,6 +129,9 @@ export function Movement({ disabled = false }: MovementProps) {
       document.removeEventListener("keyup", handleKeyUp);
       document.removeEventListener("mousemove", handleMouseMove);
       gl.domElement.removeEventListener("click", handleClick);
+      gl.domElement.removeEventListener("touchstart", handleTouchStart);
+      gl.domElement.removeEventListener("touchmove", handleTouchMove);
+      gl.domElement.removeEventListener("touchend", handleTouchEnd);
     };
   }, [camera, gl, disabled]);
 
@@ -92,7 +149,15 @@ export function Movement({ disabled = false }: MovementProps) {
     if (keysPressed.current.has("KeyA")) direction.current.x -= 1;
     if (keysPressed.current.has("KeyD")) direction.current.x += 1;
 
-    direction.current.normalize();
+    direction.current.x += joystickDirection.current.x;
+    direction.current.z += joystickDirection.current.y;
+
+    if (joystickDirection.current.x !== 0 || joystickDirection.current.y !== 0) {
+    }
+
+    if (direction.current.length() > 0) {
+      direction.current.normalize();
+    }
 
     // Apply movement
     const forward = new THREE.Vector3();

@@ -16,6 +16,8 @@ type SceneProps = {
   onPokemonPopupChange: (isOpen: boolean, pokemonName?: string) => void;
   onPokemonPick: (pokemonName: string) => void;
   isPokemonPicked: boolean;
+  joystickX?: number;
+  joystickY?: number;
 };
 
 export function Scene({ 
@@ -23,7 +25,9 @@ export function Scene({
   isPopupOpen, 
   onFadeChange, 
   onPokemonPopupChange,
-  isPokemonPicked 
+  isPokemonPicked,
+  joystickX = 0,
+  joystickY = 0
 }: SceneProps) {
   const handlePopupChange = (
     isOpen: boolean,
@@ -62,7 +66,7 @@ export function Scene({
       />
 
       {/* GAMEPLAY */}
-      <Movement disabled={isPopupOpen || isPokemonPicked} />
+      <Movement disabled={isPopupOpen || isPokemonPicked} joystickX={joystickX} joystickY={joystickY} />
       <Map />
       <SignInteraction onPopupChange={handlePopupChange} isPopupOpen={isPopupOpen} />
       <Teleporter disabled={isPopupOpen} onFadeChange={onFadeChange} />

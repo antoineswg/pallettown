@@ -2,6 +2,7 @@ import "./App.css";
 import { Canvas } from "@react-three/fiber";
 import { Scene } from "./components/Scene";
 import { LoadingScreen } from "./components/LoadingScreen";
+import { MobileControls } from "./components/MobileControls";
 import { Suspense, useState, useEffect, useRef } from "react";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
   }>({ isOpen: false });
   const [isPokemonPicked, setIsPokemonPicked] = useState(false);
   const [fadeOpacity, setFadeOpacity] = useState(0);
+  const [joystickDirection, setJoystickDirection] = useState({ x: 0, y: 0 });
   const previousPopupState = useRef(false);
   const pointerLockTimeoutRef = useRef<number | null>(null);
 
@@ -61,6 +63,10 @@ function App() {
     // Disable movement
     setIsPokemonPicked(true);
     setEndScreenData({ isOpen: true, pokemonName });
+  };
+
+  const handleJoystickChange = (x: number, y: number) => {
+    setJoystickDirection({ x, y });
   };
 
   useEffect(() => {
@@ -140,9 +146,21 @@ function App() {
             onPokemonPopupChange={handlePokemonPopupChange}
             onPokemonPick={handlePokemonPick}
             isPokemonPicked={isPokemonPicked}
+            joystickX={joystickDirection.x}
+            joystickY={joystickDirection.y}
           />
         </Suspense>
       </Canvas>
+
+      <MobileControls
+        onDirectionChange={handleJoystickChange}
+        disabled={
+          popupData.isOpen ||
+          pokemonPopupData.isOpen ||
+          endScreenData.isOpen ||
+          isPokemonPicked
+        }
+      />
 
       {popupData.isOpen && popupData.type && (
         <div
