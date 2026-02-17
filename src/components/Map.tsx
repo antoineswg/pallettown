@@ -162,6 +162,11 @@ export function Map() {
         marker: "POKEMON16MARKER",
         options: { animationIndex: 0, heightVariation: true },
       },
+      pokemon17: {
+        path: "/models/pokemons/17.glb",
+        marker: "POKEMON17MARKER",
+        options: { animationIndex: 2 },
+      },
     }),
     [],
   );
